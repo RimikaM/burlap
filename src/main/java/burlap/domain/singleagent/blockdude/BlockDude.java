@@ -388,9 +388,6 @@ public class BlockDude implements DomainGenerator{
 
 		exp.initGUI();
 
-		}
-
 	}
-
 
 }
