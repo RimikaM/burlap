@@ -139,7 +139,7 @@ public class BlockDude implements DomainGenerator{
 	protected int										maxy = 25;
 
 
-
+	protected double[][]								transitionDynamics;
 	protected RewardFunction rf;
 	protected TerminalFunction tf;
 
@@ -159,6 +159,7 @@ public class BlockDude implements DomainGenerator{
 	public BlockDude(int maxx, int maxy){
 		this.maxx = maxx;
 		this.maxy = maxy;
+		this.setDeterministicTransitionDynamics();
 	}
 
 	public RewardFunction getRf() {
@@ -236,6 +237,66 @@ public class BlockDude implements DomainGenerator{
 		this.maxy = maxy;
 	}
 
+		/**
+	 * Will set the domain to use deterministic action transitions.
+	 */
+	public void setDeterministicTransitionDynamics(){
+		int na = 4;
+		transitionDynamics = new double[na][na];
+		for(int i = 0; i < na; i++){
+			for(int j = 0; j < na; j++){
+				if(i != j){
+					transitionDynamics[i][j] = 0.;
+				}
+				else{
+					transitionDynamics[i][j] = 1.;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Sets the domain to use probabilistic transitions. Agent will move in the intended direction with probability probSucceed. Agent
+	 * will move in a random direction with probability 1 - probSucceed
+	 * @param probSucceed probability to move the in intended direction
+	 */
+	public void setProbSucceedTransitionDynamics(double probSucceed){
+		int na = 4;
+		double pAlt = (1.-probSucceed)/3.;
+		transitionDynamics = new double[na][na];
+		for(int i = 0; i < na; i++){
+			for(int j = 0; j < na; j++){
+				if(i != j){
+					transitionDynamics[i][j] = pAlt;
+				}
+				else{
+					transitionDynamics[i][j] = probSucceed;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Will set the movement direction probabilities based on the action chosen. The index (0,1,2,3) indicates the
+	 * direction north,south,east,west, respectively and the matrix is organized by transitionDynamics[selectedDirection][actualDirection].
+	 * For instance, the probability of the agent moving east when selecting north would be specified in the entry transitionDynamics[0][2]
+	 *
+	 * @param transitionDynamics entries indicate the probability of movement in the given direction (second index) for the given action selected (first index).
+	 */
+	public void setTransitionDynamics(double [][] transitionDynamics){
+		this.transitionDynamics = transitionDynamics.clone();
+	}
+
+	public double [][] getTransitionDynamics(){
+		double [][] copy = new double[transitionDynamics.length][transitionDynamics[0].length];
+		for(int i = 0; i < transitionDynamics.length; i++){
+			for(int j = 0; j < transitionDynamics[0].length; j++){
+				copy[i][j] = transitionDynamics[i][j];
+			}
+		}
+		return copy;
+	}
+
 
 
 	/**
@@ -309,7 +370,6 @@ public class BlockDude implements DomainGenerator{
 	 * @param args can be empty.
 	 */
 	public static void main(String[] args) {
-
 		BlockDude bd = new BlockDude();
 		SADomain domain = bd.generateDomain();
 		State s = BlockDudeLevelConstructor.getLevel2(domain);
@@ -328,7 +388,7 @@ public class BlockDude implements DomainGenerator{
 
 		exp.initGUI();
 
-
+		}
 
 	}
 
